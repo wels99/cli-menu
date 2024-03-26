@@ -8,6 +8,12 @@
 
 ![pic](./img/pic001.jpg)
 
+## 安装
+
+```bash
+go get -u github.com/wels99/climenu
+```
+
 ## 代码示例
 
 ```go

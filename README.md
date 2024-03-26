@@ -8,6 +8,12 @@ Supports various terminals under Windows, Linux, and MacOS.
 
 ![pic](./img/pic001.jpg)
 
+## Install
+
+```bash
+go get -u github.com/wels99/climenu
+```
+
 ## Example
 
 ```go
