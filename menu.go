@@ -98,7 +98,7 @@ func (m *Menu) Add(name, note string, tag any, act func(*Item) error) {
 	})
 }
 
-// Is the menu number displayed
+// Is the sequence number of menu items displayed
 func (m *Menu) SetIndex(si bool) {
 	m.showIndex = si
 }
