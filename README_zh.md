@@ -16,6 +16,8 @@ go get -u github.com/wels99/climenu
 
 ## 代码示例
 
+- 示例 1
+
 ```go
 ...
 m := climenu.New()
@@ -36,6 +38,8 @@ m.AddItem(climenu.Item{
 m.run()
 ...
 ```
+
+- 示例 2
 
 ```go
 package main

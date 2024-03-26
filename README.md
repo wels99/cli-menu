@@ -16,6 +16,8 @@ go get -u github.com/wels99/climenu
 
 ## Example
 
+- Example 1
+
 ```go
 ...
 m := climenu.New()
@@ -30,6 +32,8 @@ m.Add("name2", "note2", nil, func(e *climenu.Item) error {
 m.run()
 ...
 ```
+
+- Example 2
 
 ```go
 package main
