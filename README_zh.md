@@ -2,6 +2,8 @@
 
 [README](README.md) | [中文文档](README_zh.md)
 
+[![GoDoc](https://img.shields.io/badge/go-documentation-blue)](https://pkg.go.dev/github.com/wels99/climenu)
+
 终端中命令行程序的选择菜单。
 
 支持 Windows, Linux, and MacOS 下的多种终端。

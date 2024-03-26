@@ -2,6 +2,8 @@
 
 [README](README.md) | [中文文档](README_zh.md)
 
+[![GoDoc](https://img.shields.io/badge/go-documentation-blue)](https://pkg.go.dev/github.com/wels99/climenu)
+
 The selection menu for the command line program in terminal.
 
 Supports various terminals under Windows, Linux, and MacOS.
