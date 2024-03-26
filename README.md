@@ -79,11 +79,11 @@ func main() {
         m.AddItem(climenu.Item{
             Name: name,
             Note: note2,
+            Tags: v,
             Act: func(e *climenu.Item) error {
                 fmt.Println("new item selected: ", e)
                 return nil
             },
-            Tags: v,
         })
     }
 
