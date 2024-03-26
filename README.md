@@ -8,6 +8,8 @@ The selection menu for the command line program in terminal.
 
 Supports various terminals under Windows, Linux, and MacOS.
 
+Use the up and down arrow keys to select, and use the left and right arrow keys to turn pages. `<Esc>` and `<Ctrl>+C` exit, `<Enter>` confirm.
+
 ![pic](./img/pic001.jpg)
 
 ## Install

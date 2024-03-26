@@ -8,6 +8,8 @@
 
 支持 Windows, Linux, and MacOS 下的多种终端。
 
+方向键上下选择，左右翻页。`<Esc>`和`<Ctrl>+C`退出，`<Enter>`确认。
+
 ![pic](./img/pic001.jpg)
 
 ## 安装
