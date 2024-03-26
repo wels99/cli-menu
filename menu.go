@@ -80,8 +80,8 @@ func New() *Menu {
 }
 
 // Add menu item
-func (m *Menu) AddItem(i Item) {
-	m.items = append(m.items, i)
+func (m *Menu) AddItem(i ...Item) {
+	m.items = append(m.items, i...)
 }
 
 // Add menu item
