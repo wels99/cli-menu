@@ -73,7 +73,7 @@ func main() {
     m.SetSelectIcon(" \u27A4 ") // '➤'
     m.SetMessage("select one:")
     m.SetPagesize(5)
-    // m.SetSelectedColor(menu.Color_Red)
+    // m.SetSelectedColor(climenu.Color_Red)
     // m.SetDelimiter("|")
     // m.Seti18n("当前", "页", "方向键移动，回车确认")
 
