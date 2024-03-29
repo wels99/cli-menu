@@ -35,27 +35,27 @@ func (m *Menu) getInput() (int, string) {
 
 	k := keys[0]
 	switch {
-	case k.Type == termios.KeySpecial && k.Mod == 0 && k.Value == termios.SpecialArrowUp:
+	case k.Type == termios.KeySpecial && k.Value == termios.SpecialArrowUp:
 		return KEY_up, ""
-	case k.Type == termios.KeySpecial && k.Mod == 0 && k.Value == termios.SpecialArrowDown:
+	case k.Type == termios.KeySpecial && k.Value == termios.SpecialArrowDown:
 		return KEY_down, ""
-	case k.Type == termios.KeySpecial && k.Mod == 0 && k.Value == termios.SpecialArrowLeft:
+	case k.Type == termios.KeySpecial && k.Value == termios.SpecialArrowLeft:
 		return KEY_left, ""
-	case k.Type == termios.KeySpecial && k.Mod == 0 && k.Value == termios.SpecialArrowRight:
+	case k.Type == termios.KeySpecial && k.Value == termios.SpecialArrowRight:
 		return KEY_right, ""
-	case k.Type == termios.KeySpecial && k.Mod == 0 && k.Value == termios.SpecialEnter:
+	case k.Type == termios.KeySpecial && k.Value == termios.SpecialEnter:
 		return KEY_enter, ""
-	case k.Type == termios.KeySpecial && k.Mod == 0 && k.Value == termios.SpecialEscape:
+	case k.Type == termios.KeySpecial && k.Value == termios.SpecialEscape:
 		return KEY_escape, ""
-	case k.Type == termios.KeySpecial && k.Mod == 0 && k.Value == termios.SpecialPgUp:
+	case k.Type == termios.KeySpecial && k.Value == termios.SpecialPgUp:
 		return KEY_pageup, ""
-	case k.Type == termios.KeySpecial && k.Mod == 0 && k.Value == termios.SpecialPgDown:
+	case k.Type == termios.KeySpecial && k.Value == termios.SpecialPgDown:
 		return KEY_pagedown, ""
-	case k.Type == 0 && k.Mod == termios.ModCtrl && k.Value == 'c':
+	case k.Mod == termios.ModCtrl && k.Value == 'c':
 		return KEY_ctrlC, ""
-	case k.Type == termios.KeySpecial && k.Mod == termios.ModCtrl && k.Value == termios.SpecialBackspace:
+	case k.Type == termios.KeySpecial && k.Value == termios.SpecialBackspace:
 		return KEY_backspace, ""
-	case k.Type == 0 && k.Mod == 0 && (k.Value >= '!' && k.Value <= '~'):
+	case k.Type == termios.KeyLetter && (k.Value >= '!' && k.Value <= '~'):
 		return KEY_filterstring, string(k.Value)
 	}
 	return KEY_ignore, ""

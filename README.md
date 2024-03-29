@@ -103,7 +103,7 @@ func main() {
     e, _ := m.Run()
     if e != nil {
         fmt.Println("return:", e)
-        ret.Act(e)
+        e.Act(e)
     }
 }
 ```
