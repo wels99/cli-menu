@@ -12,13 +12,13 @@ import (
 
 func main() {
 
-	mitems := [][]string{
-		{"item001", "note001"},
-		{"item002", "note002"},
-		{"item003", "note003"},
-		{"item004", "note004"},
-		{"item005", "note005"},
-		{"item006", "note006"},
+	mitems := [][]string{}
+
+	for i := 0; i < 1000; i++ {
+		mitems = append(mitems, []string{
+			fmt.Sprintf("item%03d", i),
+			fmt.Sprintf("note%03d", i),
+		})
 	}
 
 	m := climenu.New()
@@ -56,9 +56,9 @@ func main() {
 		return i.Name > j.Name
 	})
 
-	e, _ := m.Run()
-	if e != nil {
-		fmt.Println("return:", e)
-		ret.Act(e)
+	ret, _ := m.Run()
+	if ret != nil {
+		fmt.Println("return:", ret)
+		ret.Act(ret)
 	}
 }

@@ -10,6 +10,10 @@ Supports various terminals under Windows, Linux, and MacOS.
 
 Use the up and down arrow keys to select, and use the left and right arrow keys to turn pages. `<Esc>` and `<Ctrl>+C` exit, `<Enter>` confirm.
 
+Key `<PageUp>` and `<PageDown>` can also be turn pages.
+
+Input regular characters to filter menu item names. Case insensitive.
+
 ![pic](./img/pic001.jpg)
 
 ## Install
@@ -96,10 +100,10 @@ func main() {
         return i.Name > j.Name
     })
 
-    ret, _ := m.Run()
-    if ret > 0 {
-        e, _ := m.GetItem(ret)
+    e, _ := m.Run()
+    if e != nil {
         fmt.Println("return:", e)
+        ret.Act(e)
     }
 }
 ```

@@ -10,6 +10,10 @@
 
 方向键上下选择，左右翻页。`<Esc>`和`<Ctrl>+C`退出，`<Enter>`确认。
 
+`<PageUp>`和`<PageDown>`也可以翻页。
+
+输入普通字符可以过滤菜单项名字。不区分字母大小写。
+
 ![pic](./img/pic001.jpg)
 
 ## 安装
@@ -102,10 +106,10 @@ func main() {
         return i.Name > j.Name
     })
 
-    ret, _ := m.Run()
-    if ret > 0 {
-        e, _ := m.GetItem(ret)
+    e, _ := m.Run()
+    if e != nil {
         fmt.Println("return:", e)
+        ret.Act(e)
     }
 }
 ```

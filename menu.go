@@ -15,7 +15,8 @@ import (
 )
 
 type Item struct {
-	idxstr string            // Display string for menu serial number
+	idx    int               // the sequence number
+	idxstr string            // Display string for menu sequence number
 	Name   string            // Menu item name, first item displayed
 	Note   string            // Menu item description, second item displayed
 	Tags   any               // Attached data
@@ -29,53 +30,55 @@ type LangTxt struct {
 } // Footer information
 
 type Menu struct {
-	items         []Item       // Menu items
-	message       string       // Menu prompt words
-	pageSize      int          // Quantity per page
-	curPage       int          // Current page
-	curIndex      int          // The currently selected menu item
-	cursor        string       // The indicator cursor for the current selection
-	cursorspacer  string       // Indicator cursor blank placeholder string
-	showIndex     bool         // Display menu number
-	showNamelen   int          // Display menu name width
-	showNotelen   int          // Display menu description width
-	cache         bytes.Buffer // Output cache
-	rowcount      int          // Display Area Rows
-	pagecount     int          // Total number of pages
-	lastpagestart int          // Start index of the last page
-	delimiter     string       // Field delimiter
-	spacer        string       // Blank placeholder characters
-	itemcount     int          // Menu item count
-	selectedColor string       // Selected item color
-	lang          LangTxt      // Display language
+	items            []Item       // Menu items
+	itemsdisplay     []*Item      // Filtered items, used to display
+	message          string       // Menu prompt words
+	pageSize         int          // Quantity per page
+	curPage          int          // Current page
+	curIndex         int          // The currently selected menu item
+	cursor           string       // The indicator cursor for the current selection
+	cursorspacer     string       // Indicator cursor blank placeholder string
+	showIndex        bool         // Display menu sequence number
+	showNamelen      int          // Display menu name width
+	showNotelen      int          // Display menu description width
+	cache            bytes.Buffer // Output cache
+	rowcount         int          // Display Area Rows
+	pagecount        int          // Total number of pages
+	lastpagestart    int          // Start index of the last page
+	delimiter        string       // Field delimiter
+	spacer           string       // Blank placeholder characters
+	itemcount        int          // Menu item count
+	itemdisplaycount int          // displayed menu items count
+	selectedColor    string       // Selected item color
+	lang             LangTxt      // Display language
+	filter           string       // Filter strings
 } // Menu structure
 
 // Create a new menu object
 func New() *Menu {
 	return &Menu{
-		items:         []Item{},
-		message:       "",
-		pageSize:      10,
-		curPage:       0,
-		curIndex:      0,
-		cursor:        ">>> ",
-		cursorspacer:  " ",
-		showIndex:     false,
-		showNamelen:   0,
-		showNotelen:   0,
-		cache:         bytes.Buffer{},
-		rowcount:      0,
-		pagecount:     0,
-		lastpagestart: 0,
-		delimiter:     "   ",
-		spacer:        " ",
-		itemcount:     0,
-		selectedColor: "\033[34;1m",
-		lang: LangTxt{
-			Cur:  "Cur",
-			Page: "Page",
-			Help: "Arrow key move, <Esc> or <Ctrl>+C exit, <Enter> confirm",
-		},
+		items:            []Item{},
+		itemsdisplay:     []*Item{},
+		message:          "",
+		pageSize:         10,
+		curPage:          0,
+		curIndex:         0,
+		cursor:           ">>> ",
+		cursorspacer:     " ",
+		showIndex:        false,
+		showNamelen:      0,
+		showNotelen:      0,
+		cache:            bytes.Buffer{},
+		rowcount:         0,
+		pagecount:        0,
+		lastpagestart:    0,
+		delimiter:        "   ",
+		spacer:           " ",
+		itemcount:        0,
+		itemdisplaycount: 0,
+		selectedColor:    "\033[34;1m",
+		lang:             LangTxt{Cur: "Cur", Page: "Page", Help: "Arrow key move, <Esc> or <Ctrl>+C exit, <Enter> confirm"},
+		filter:           "",
 	}
 }
 
@@ -147,12 +150,11 @@ func (m *Menu) Sort(s func(i, j *Item) bool) {
 }
 
 // Run menu, loop endlessly.
-// Exit only after selecting a menu item and executing it.
-// Returns the serial number of the currently selected menu item.
-// The sequence number of the selected menu item is the index of the menu item array plus 1.
-func (m *Menu) Run() (int, error) {
+// Exit after selecting a menu item and executing it, or interrupt with CtrlC.
+// Returns the currently selected menu item.
+func (m *Menu) Run() (*Item, error) {
 	if len(m.items) == 0 {
-		return 0, errors.New("no menu item")
+		return nil, errors.New("no menu item")
 	}
 
 	cursorHide(os.Stdout)
@@ -161,7 +163,8 @@ func (m *Menu) Run() (int, error) {
 	for isloop {
 		m.update()
 		m.renderer()
-		switch m.getInput() {
+		keytype, c := m.getInput()
+		switch keytype {
 		case KEY_escape, KEY_ctrlC:
 			isloop = false
 		case KEY_up:
@@ -169,34 +172,44 @@ func (m *Menu) Run() (int, error) {
 				m.curIndex--
 			}
 		case KEY_down:
-			if m.curIndex < m.itemcount-1 {
+			if m.curIndex < m.itemdisplaycount-1 {
 				m.curIndex++
 			}
-		case KEY_left:
+		case KEY_left, KEY_pageup:
 			if m.curIndex >= m.pageSize {
 				m.curIndex -= m.pageSize
 			}
-		case KEY_right:
+		case KEY_right, KEY_pagedown:
 			if m.curIndex < m.lastpagestart {
 				newidx := m.curIndex + m.pageSize
-				if newidx < m.itemcount {
+				if newidx < m.itemdisplaycount {
 					m.curIndex = newidx
 				} else {
-					m.curIndex = m.itemcount - 1
+					m.curIndex = m.itemdisplaycount - 1
 				}
 			}
 		case KEY_enter:
-			act := m.items[m.curIndex].Act
-			if act != nil {
-				m.rendererclear()
-				cursorShow(os.Stdout)
-				return m.curIndex + 1, act(&m.items[m.curIndex])
+			if m.itemdisplaycount > 0 {
+				act := m.itemsdisplay[m.curIndex].Act
+				if act != nil {
+					m.rendererclear()
+					cursorShow(os.Stdout)
+					return m.itemsdisplay[m.curIndex], act(m.itemsdisplay[m.curIndex])
+				}
 			}
+		case KEY_backspace:
+			if len(m.filter) > 0 {
+				m.filter = m.filter[:len(m.filter)-1]
+				m.reconfigure()
+			}
+		case KEY_filterstring:
+			m.filter += c
+			m.reconfigure()
 		}
 	}
 	m.rendererclear()
 	cursorShow(os.Stdout)
-	return 0, nil
+	return nil, errors.New("exit without selection")
 }
 
 // Update display cache
@@ -204,14 +217,14 @@ func (m *Menu) update() {
 	m.cache.Reset()
 	w := io.Writer(&m.cache)
 	// head
-	fmt.Fprintf(w, "%s\033[K\n", m.message)
+	fmt.Fprintf(w, "%s   %s\033[K\n", m.message, m.filter)
 	//
 	curpage := m.curIndex / m.pageSize
 	istart := curpage * m.pageSize
 	for i := 0; i < m.pageSize; i++ {
 		idx := istart + i
-		if idx < m.itemcount {
-			v := m.items[idx]
+		if idx < m.itemdisplaycount {
+			v := m.itemsdisplay[idx]
 			if idx == m.curIndex {
 				fmt.Fprint(w, m.cursor, m.selectedColor)
 			} else {
@@ -227,7 +240,7 @@ func (m *Menu) update() {
 	}
 	// foot
 	pageidx := m.curIndex/m.pageSize + 1
-	fmt.Fprintf(w, "%s: (%d/%d) %s: (%d/%d) %s\033[K\n", m.lang.Cur, m.curIndex+1, m.itemcount, m.lang.Page, pageidx, m.pagecount, m.lang.Help)
+	fmt.Fprintf(w, "%s: (%d/%d) %s: (%d/%d) %s\033[K\n", m.lang.Cur, m.items[m.curIndex].idx, m.itemdisplaycount, m.lang.Page, pageidx, m.pagecount, m.lang.Help)
 }
 
 // Output cache to screen
@@ -247,11 +260,9 @@ func (m *Menu) configure() {
 	m.cursorspacer = strings.Repeat(m.spacer, getWidth(m.cursor))
 	m.itemcount = len(m.items)
 	m.pageSize = min(m.pageSize, m.itemcount)
+	m.itemsdisplay = make([]*Item, 0, m.itemcount)
 
 	m.rowcount = m.pageSize + 2
-	m.pagecount = (m.itemcount-1)/m.pageSize + 1
-	m.lastpagestart = (m.pagecount - 1) * m.pageSize
-
 	s := fmt.Sprintf("%d", m.itemcount)
 	showIndexlen := getWidth(s)
 
@@ -267,10 +278,38 @@ func (m *Menu) configure() {
 
 	idxfmt := fmt.Sprintf("[%%%dd]:", showIndexlen)
 	for i := 0; i < m.itemcount; i++ {
+		m.items[i].idx = i + 1
 		m.items[i].idxstr = fmt.Sprintf(idxfmt, i+1)
 		m.items[i].Name += strings.Repeat(m.spacer, m.showNamelen-anamelen[i])
 		m.items[i].Note += strings.Repeat(m.spacer, m.showNotelen-anotelen[i])
 	}
+
+	m.reconfigure()
+}
+
+// 根据当前显示内容重新计算参数
+func (m *Menu) reconfigure() {
+	m.itemsdisplay = m.itemsdisplay[0:0]
+	if m.filter == "" {
+		for i := range m.items {
+			m.itemsdisplay = append(m.itemsdisplay, &m.items[i])
+		}
+	} else {
+		filterlower := strings.ToLower(m.filter)
+		for i := range m.items {
+			if strings.Contains(
+				strings.ToLower(m.items[i].Name),
+				filterlower,
+			) {
+				m.itemsdisplay = append(m.itemsdisplay, &m.items[i])
+			}
+		}
+	}
+
+	m.itemdisplaycount = len(m.itemsdisplay)
+	m.pagecount = (m.itemdisplaycount-1)/m.pageSize + 1
+	m.lastpagestart = (m.pagecount - 1) * m.pageSize
+	m.curIndex = 0
 }
 
 // Set selected item color.
@@ -296,15 +335,6 @@ func (m *Menu) SetSelectedStyle(styles ...string) {
 	if m.selectedColor == "" {
 		m.selectedColor = Style_Blue
 	}
-}
-
-// Get the menu item with the sequence number.
-// The sequence number of the menu item is the index of the menu item array plus 1.
-func (m *Menu) GetItem(sortnumber int) (*Item, error) {
-	if sortnumber < 1 || sortnumber > m.itemcount {
-		return nil, errors.New("incorrect sortnumber")
-	}
-	return &m.items[sortnumber-1], nil
 }
 
 // Set language text for foot
