@@ -312,17 +312,6 @@ func (m *Menu) reconfigure() {
 	m.curIndex = 0
 }
 
-// Set selected item color.
-//
-// Deprecated: use 'SetSelectedStyle'.
-func (m *Menu) SetSelectedColor(c int) {
-	if c > Color_min && c < Color_max {
-		m.selectedColor = fmt.Sprintf("\033[%d;1m", c)
-	} else {
-		m.selectedColor = fmt.Sprintf("\033[%d;1m", Color_Blue)
-	}
-}
-
 // Set selected item style. Use regular expression `^\033\[[\d;]+m$` to check.
 func (m *Menu) SetSelectedStyle(styles ...string) {
 	re := regexp.MustCompile(`^\033\[[\d;]+m$`)
