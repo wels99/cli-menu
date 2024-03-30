@@ -300,6 +300,9 @@ func (m *Menu) reconfigure() {
 			if strings.Contains(
 				strings.ToLower(m.items[i].Name),
 				filterlower,
+			) || strings.Contains(
+				strings.ToLower(m.items[i].Note),
+				filterlower,
 			) {
 				m.itemsdisplay = append(m.itemsdisplay, &m.items[i])
 			}

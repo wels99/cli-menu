@@ -12,7 +12,7 @@ Use the up and down arrow keys to select, and use the left and right arrow keys 
 
 Key `<PageUp>` and `<PageDown>` can also be turn pages.
 
-Input regular characters to filter menu item names. Case insensitive.
+Input regular characters to filter menu item names and note. Case insensitive.
 
 ![pic](./img/pic001.jpg)
 
